@@ -1,11 +1,6 @@
 const {shell, ipcRenderer} = require('electron');
 
-// 打开记事本
-let notepadBtn = document.getElementById('notepad');
-notepadBtn.addEventListener('click', function(event) {
-  let r = shell.openExternal('notepad');
-  console.log(r);
-});
+document.getElementById('z7path').innerText = require('7zip-bin').path7za;
 
 // 文件拖动获取路径
 // let holder = document.getElementById('holder');
@@ -38,7 +33,15 @@ fileCompress.addEventListener('click', function(event) {
   ipcRenderer.send('compress-file', document.getElementById('file-path').innerText);
 });
 
-// let fileUncompress = document.getElementById('file-uncompress');
-// fileUncompress.addEventListener('click', function(event) {
-//   ipcRenderer.send('uncompress-file', document.getElementById('file-path').innerText);
-// });
+ipcRenderer.on('compress-result', function(event, data) {
+  document.getElementById('compress-result').innerText = data;
+});
+
+let fileUncompress = document.getElementById('file-uncompress');
+fileUncompress.addEventListener('click', function(event) {
+  ipcRenderer.send('uncompress-file', document.getElementById('file-path').innerText);
+});
+
+ipcRenderer.on('uncompress-result', function(event, data) {
+  document.getElementById('uncompress-result').innerText = data;
+});

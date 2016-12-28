@@ -1,12 +1,13 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
-
+const fs = require('fs');
 const archiver = require('archiver');
 const unzip = require('unzip');
-const fstream = require('fstream');
+// const fstream = require('fstream');
 const os = require('os');
-const CompressUtil = require('./service/compress.js');
+const z7 =require('7zip-bin');
+const compress = require('./service/compress.js');
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -86,6 +87,8 @@ function createWindow() {
 
   let menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
+
+  console.log('7z path:', z7.path7za);
 }
 
 function createTray() {
@@ -131,11 +134,43 @@ ipcMain.on('open-file-dialog', function(event) {
 });
 
 ipcMain.on('compress-file', function(event, arg) {
-  console.log('directory:' + arg);
-  CompressUtil.compress(arg);
+  let outputFile = path.join(os.tmpdir(), path.sep, 'test.7z');
+  if(fs.existsSync(outputFile)) {
+    fs.unlinkSync(outputFile);
+    console.log('unlinkSync');
+  }
+
+  compress.compress7z(arg, outputFile, function(result) {
+    event.sender.send('compress-result', result);
+  });
+  event.sender.send('compress-result', '压缩中');
 });
 
 ipcMain.on('uncompress-file', function(event, arg) {
-  console.log('uncompress');
-  CompressUtil.uncompress(os.tmpdir() + '\\test.zip', os.tmpdir() + '\\test');
+  let sourceFile = path.join(os.tmpdir(), path.sep, 'test.7z');
+  let targetPath = path.join(os.tmpdir(), path.sep, 'test');
+  if(fs.existsSync(targetPath)) {
+    delFolder(targetPath);
+    console.log('delFolder');
+  }
+  compress.uncompress7z(sourceFile, targetPath, function(result) {
+    event.sender.send('uncompress-result', result);
+  });
+  event.sender.send('uncompress-result', '解压中');
 });
+
+function delFolder(folder) {
+  let files = [];
+  if(fs.existsSync(folder)) {
+    files = fs.readdirSync(folder);
+    files.forEach(function(file, index) {
+      let curPath = path.join(folder, path.sep, file);
+      if(fs.statSync(curPath).isDirectory()) {
+        delFolder(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(folder);
+  }
+}

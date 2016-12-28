@@ -8,15 +8,17 @@
     Node.js version:<script>document.write(process.versions.node)</script><br/>
     Chromium version:<script>document.write(process.versions.chrome)</script><br/>
     Electron version:<script>document.write(process.versions.electron)</script><br/>
+    7zip Path:<span id="z7path"></span>
     <hr />
-    <p><button id="notepad">记事本</button></p>
     <!-- <div id="holder" style="border:1px solid black;height:100px;">
       把你的文件拖动到此
     </div> -->
-    <button id="file-manage">选择文件夹</button>
-    <span id="file-path"></span>
-    <button id="file-compress">压缩</button>
-    <!-- <button id="file-uncompress">解压</button> -->
+    <p><button id="file-manage">选择文件夹</button>
+    <span id="file-path"></span></p>
+    <p><button id="file-compress">压缩</button>
+    <span id="compress-result"></span></p>
+    <p><button id="file-uncompress">解压</button>
+    <span id="uncompress-result"></span></p>
   </body>
 
   <script>
